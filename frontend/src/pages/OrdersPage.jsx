@@ -4,8 +4,10 @@ import orderService from "../services/orderService";
 import { formatCurrency, formatDate } from "../utils/format";
 import { ORDER_STATUS_COLORS } from "../utils/constants";
 import { getApiErrorMessage } from "../utils/apiError";
+import { useLanguage } from "../context/LanguageContext";
 
 function OrdersPage() {
+  const { t } = useLanguage();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -29,32 +31,32 @@ function OrdersPage() {
   }, []);
 
   if (loading) {
-    return <Loader label="Loading orders..." />;
+    return <Loader label={t("orders.loading")} />;
   }
 
   return (
     <section className="page-card">
       <div className="section-head">
-        <h2>My Orders</h2>
-        <p className="muted">{orders.length} orders</p>
+        <h2>{t("orders.title")}</h2>
+        <p className="muted">{t("orders.count", { count: orders.length })}</p>
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}
 
       {orders.length === 0 ? (
-        <p>No orders found yet.</p>
+        <p>{t("orders.none")}</p>
       ) : (
         <div className="orders-list">
           {orders.map((order) => (
             <article className="order-card" key={order.id}>
               <header className="order-head">
-                <h3>Order #{order.id}</h3>
+                <h3>{t("orders.order")} #{order.id}</h3>
                 <span className={`order-status ${ORDER_STATUS_COLORS[order.status] || ""}`}>
                   {order.status}
                 </span>
               </header>
-              <p className="muted">Placed: {formatDate(order.createdAt)}</p>
-              <p>Total: {formatCurrency(order.totalAmount)}</p>
+              <p className="muted">{t("orders.placed")}: {formatDate(order.createdAt)}</p>
+              <p>{t("orders.total")}: {formatCurrency(order.totalAmount)}</p>
 
               <div className="order-items">
                 {order.items?.map((item) => (

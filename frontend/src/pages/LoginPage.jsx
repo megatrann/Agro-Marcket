@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { getApiErrorMessage } from "../utils/apiError";
 
 function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -39,12 +41,12 @@ function LoginPage() {
 
   return (
     <section className="auth-wrap page-card">
-      <h2>Login</h2>
-      <p className="muted">Access your cart, orders, and purchase history.</p>
+      <h2>{t("auth.loginTitle")}</h2>
+      <p className="muted">{t("auth.loginSubtitle")}</p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label>
-          Email
+          {t("auth.email")}
           <input
             type="email"
             name="email"
@@ -55,7 +57,7 @@ function LoginPage() {
         </label>
 
         <label>
-          Password
+          {t("auth.password")}
           <input
             type="password"
             name="password"
@@ -68,12 +70,12 @@ function LoginPage() {
         {error ? <p className="error-text">{error}</p> : null}
 
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Signing in..." : "Login"}
+          {loading ? t("auth.signingIn") : t("auth.loginTitle")}
         </button>
       </form>
 
       <p className="auth-meta">
-        New here? <Link to="/register">Create an account</Link>
+        {t("auth.newHere")} <Link to="/register">{t("auth.createAccount")}</Link>
       </p>
     </section>
   );

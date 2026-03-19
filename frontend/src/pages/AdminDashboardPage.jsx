@@ -35,21 +35,25 @@ function AdminDashboardPage() {
 
   return (
     <section className="admin-grid">
-      <article className="admin-stat-card page-card">
+      <article className="admin-stat-card page-card stat-users">
+        <p className="stat-label">Platform Reach</p>
         <h3>Total Users</h3>
-        <p>{stats?.totalUsers ?? 0}</p>
+        <p className="stat-value">{stats?.totalUsers ?? 0}</p>
       </article>
-      <article className="admin-stat-card page-card">
+      <article className="admin-stat-card page-card stat-sellers">
+        <p className="stat-label">Supply Network</p>
         <h3>Total Farmers/Vendors</h3>
-        <p>{stats?.totalFarmerVendors ?? 0}</p>
+        <p className="stat-value">{stats?.totalFarmerVendors ?? 0}</p>
       </article>
-      <article className="admin-stat-card page-card">
+      <article className="admin-stat-card page-card stat-products">
+        <p className="stat-label">Marketplace Depth</p>
         <h3>Total Products</h3>
-        <p>{stats?.totalProducts ?? 0}</p>
+        <p className="stat-value">{stats?.totalProducts ?? 0}</p>
       </article>
-      <article className="admin-stat-card page-card">
+      <article className="admin-stat-card page-card stat-orders">
+        <p className="stat-label">Transaction Flow</p>
         <h3>Total Orders</h3>
-        <p>{stats?.totalOrders ?? 0}</p>
+        <p className="stat-value">{stats?.totalOrders ?? 0}</p>
       </article>
     </section>
   );

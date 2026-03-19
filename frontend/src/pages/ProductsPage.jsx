@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard";
 import useDebounce from "../hooks/useDebounce";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useLanguage } from "../context/LanguageContext";
 import productService from "../services/productService";
 import { CATEGORY_OPTIONS } from "../utils/constants";
 import { getApiErrorMessage } from "../utils/apiError";
@@ -14,6 +15,7 @@ function ProductsPage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
 
@@ -77,12 +79,12 @@ function ProductsPage() {
   return (
     <section className="marketplace-layout">
       <div className="page-card filter-card">
-        <h2>Marketplace</h2>
+        <h2>{t("products.marketplace")}</h2>
         <div className="filter-grid">
           <label>
-            Category
+            {t("products.category")}
             <select name="category" value={filters.category} onChange={handleFilterChange}>
-              <option value="">All</option>
+              <option value="">{t("products.all")}</option>
               {CATEGORY_OPTIONS.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -92,26 +94,26 @@ function ProductsPage() {
           </label>
 
           <label>
-            Location
+            {t("products.location")}
             <input
               name="location"
               value={filters.location}
               onChange={handleFilterChange}
-              placeholder="Search location"
+              placeholder={t("products.searchLocation")}
             />
           </label>
 
           <label>
-            Organic
+            {t("products.organic")}
             <select name="organic" value={filters.organic} onChange={handleFilterChange}>
-              <option value="">All</option>
-              <option value="true">Organic</option>
-              <option value="false">Non-organic</option>
+              <option value="">{t("products.all")}</option>
+              <option value="true">{t("products.organic")}</option>
+              <option value="false">{t("products.nonOrganic")}</option>
             </select>
           </label>
 
           <label>
-            Min Price
+            {t("products.minPrice")}
             <input
               name="minPrice"
               type="number"
@@ -123,7 +125,7 @@ function ProductsPage() {
           </label>
 
           <label>
-            Max Price
+            {t("products.maxPrice")}
             <input
               name="maxPrice"
               type="number"
@@ -138,11 +140,11 @@ function ProductsPage() {
 
       <div className="page-card products-results">
         <div className="section-head">
-          <h3>Products</h3>
-          <p className="muted">{products.length} items</p>
+          <h3>{t("products.title")}</h3>
+          <p className="muted">{t("products.items", { count: products.length })}</p>
         </div>
 
-        {loading ? <Loader label="Loading products..." /> : null}
+        {loading ? <Loader label={t("products.loading")} /> : null}
         {error ? <p className="error-text">{error}</p> : null}
 
         {!loading && !error ? (
@@ -158,7 +160,7 @@ function ProductsPage() {
               ))}
             </div>
           ) : (
-            <p>No products found for selected filters.</p>
+            <p>{t("products.empty")}</p>
           )
         ) : null}
       </div>

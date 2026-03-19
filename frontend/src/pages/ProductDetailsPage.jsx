@@ -6,12 +6,15 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { formatCurrency } from "../utils/format";
 import { getApiErrorMessage } from "../utils/apiError";
+import { FALLBACK_IMAGE, resolveImageUrl } from "../utils/image";
+import { useLanguage } from "../context/LanguageContext";
 
 function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
+  const { t } = useLanguage();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,7 +28,7 @@ function ProductDetailsPage() {
 
       try {
         const data = await productService.getProductById(id);
-        const selected = data.product?.images?.[0] || "";
+        const selected = resolveImageUrl(data.product?.images?.[0]);
         setProduct(data.product);
         setSelectedImage(selected);
       } catch (err) {
@@ -52,7 +55,7 @@ function ProductDetailsPage() {
   };
 
   if (loading) {
-    return <Loader label="Loading product..." />;
+    return <Loader label={t("product.loading")} />;
   }
 
   if (error) {
@@ -60,16 +63,33 @@ function ProductDetailsPage() {
   }
 
   if (!product) {
-    return <section className="page-card">Product not found.</section>;
+    return <section className="page-card">{t("product.notFound")}</section>;
   }
 
-  const images = product.images?.length ? product.images : ["https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?auto=format&fit=crop&w=1000&q=80"];
+  const images =
+    product.images?.length > 0
+      ? product.images.map((image) => resolveImageUrl(image)).filter(Boolean)
+      : [FALLBACK_IMAGE];
   const activeImage = selectedImage || images[0];
+  const activeImageIndex = Math.max(0, images.findIndex((image) => image === activeImage));
 
   return (
     <section className="product-detail page-card">
       <div className="gallery-col">
-        <img src={activeImage} alt={product.title} className="detail-main-image" />
+        <div className="detail-image-shell">
+          <img
+            src={resolveImageUrl(activeImage)}
+            alt={product.title}
+            className="detail-main-image"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = FALLBACK_IMAGE;
+            }}
+          />
+        </div>
+        <p className="gallery-meta">
+          {t("product.imageOf", { current: activeImageIndex + 1, total: images.length })}
+        </p>
         <div className="thumb-row">
           {images.map((image) => (
             <button
@@ -78,7 +98,14 @@ function ProductDetailsPage() {
               className={`thumb-btn ${activeImage === image ? "active" : ""}`}
               onClick={() => setSelectedImage(image)}
             >
-              <img src={image} alt={product.title} />
+              <img
+                src={resolveImageUrl(image)}
+                alt={product.title}
+                onError={(event) => {
+                  event.currentTarget.onerror = null;
+                  event.currentTarget.src = FALLBACK_IMAGE;
+                }}
+              />
             </button>
           ))}
         </div>
@@ -86,25 +113,28 @@ function ProductDetailsPage() {
 
       <div className="detail-col">
         <h2>{product.title}</h2>
-        {product.organic ? <span className="badge badge-organic">Organic Product</span> : null}
-        <p className="muted">Category: {product.category}</p>
-        {product.subcategory ? <p className="muted">Subcategory: {product.subcategory}</p> : null}
+        <div className="detail-badges">
+          {product.organic ? <span className="badge badge-organic">{t("product.organicProduct")}</span> : null}
+          <span className="badge detail-category">{product.category}</span>
+          {product.subcategory ? <span className="badge detail-category">{product.subcategory}</span> : null}
+        </div>
+        {product.subcategory ? <p className="muted">{t("product.subcategory")}: {product.subcategory}</p> : null}
         <p className="detail-description">{product.description}</p>
-        <p>Retail: {formatCurrency(product.retailPrice)}</p>
-        <p>Wholesale: {formatCurrency(product.wholesalePrice)}</p>
-        <p>Minimum wholesale qty: {product.minWholesaleQty}</p>
-        <p>Location: {product.location}</p>
-        <p>Available quantity: {product.quantity}</p>
+        <p>{t("product.retail")}: {formatCurrency(product.retailPrice)}</p>
+        <p>{t("product.wholesale")}: {formatCurrency(product.wholesalePrice)}</p>
+        <p>{t("product.minWholesale")}: {product.minWholesaleQty}</p>
+        <p>{t("product.location")}: {product.location}</p>
+        <p>{t("product.availableQty")}: {product.quantity}</p>
 
         <div className="seller-box">
-          <h4>Seller Details</h4>
-          <p>Name: {product.seller?.name || "N/A"}</p>
-          <p>Email: {product.seller?.email || "N/A"}</p>
-          <p>Role: {product.seller?.role || "N/A"}</p>
+          <h4>{t("product.sellerDetails")}</h4>
+          <p>{t("auth.name")}: {product.seller?.name || t("common.na")}</p>
+          <p>{t("auth.email")}: {product.seller?.email || t("common.na")}</p>
+          <p>{t("auth.role")}: {product.seller?.role || t("common.na")}</p>
         </div>
 
         <button type="button" className="btn btn-primary" onClick={handleAddToCart}>
-          Add to Cart
+          {t("product.addToCart")}
         </button>
       </div>
     </section>

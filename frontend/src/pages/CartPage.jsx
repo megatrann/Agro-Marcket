@@ -5,10 +5,13 @@ import { useCart } from "../context/CartContext";
 import orderService from "../services/orderService";
 import { formatCurrency } from "../utils/format";
 import { getApiErrorMessage } from "../utils/apiError";
+import { FALLBACK_IMAGE, resolveImageUrl } from "../utils/image";
+import { useLanguage } from "../context/LanguageContext";
 
 function CartPage() {
   const navigate = useNavigate();
   const { items, loading, totalPrice, updateItem, removeItem, refreshCart } = useCart();
+  const { t } = useLanguage();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -57,28 +60,32 @@ function CartPage() {
   };
 
   if (loading) {
-    return <Loader label="Loading cart..." />;
+    return <Loader label={t("cart.loading")} />;
   }
 
   return (
     <section className="page-card">
       <div className="section-head">
-        <h2>My Cart</h2>
-        <p className="muted">{totalQuantity} items</p>
+        <h2>{t("cart.title")}</h2>
+        <p className="muted">{t("cart.items", { count: totalQuantity })}</p>
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}
 
       {items.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <p>{t("cart.empty")}</p>
       ) : (
         <>
           <div className="cart-list">
             {items.map((item) => (
               <article key={item.id} className="cart-item">
                 <img
-                  src={item.product?.images?.[0] || "https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?auto=format&fit=crop&w=600&q=80"}
+                  src={resolveImageUrl(item.product?.images?.[0])}
                   alt={item.product?.title}
+                  onError={(event) => {
+                    event.currentTarget.onerror = null;
+                    event.currentTarget.src = FALLBACK_IMAGE;
+                  }}
                 />
                 <div className="cart-item-body">
                   <h3>{item.product?.title}</h3>
@@ -93,7 +100,7 @@ function CartPage() {
                     onChange={(event) => handleUpdate(item.id, event.target.value)}
                   />
                   <button type="button" className="btn btn-outline" onClick={() => handleRemove(item.id)}>
-                    Remove
+                    {t("cart.remove")}
                   </button>
                 </div>
               </article>
@@ -101,9 +108,9 @@ function CartPage() {
           </div>
 
           <div className="checkout-bar">
-            <h3>Total: {formatCurrency(totalPrice)}</h3>
+            <h3>{t("cart.total")}: {formatCurrency(totalPrice)}</h3>
             <button type="button" className="btn btn-primary" onClick={handleCheckout} disabled={submitting}>
-              {submitting ? "Processing..." : "Checkout"}
+              {submitting ? t("cart.processing") : t("cart.checkout")}
             </button>
           </div>
         </>

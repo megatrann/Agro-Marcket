@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import { getApiErrorMessage } from "../utils/apiError";
 
 function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t } = useLanguage();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -38,12 +40,12 @@ function RegisterPage() {
 
   return (
     <section className="auth-wrap page-card">
-      <h2>Create Account</h2>
-      <p className="muted">Register as customer, farmer, or vendor.</p>
+      <h2>{t("auth.registerTitle")}</h2>
+      <p className="muted">{t("auth.registerSubtitle")}</p>
 
       <form className="auth-form" onSubmit={handleSubmit}>
         <label>
-          Name
+          {t("auth.name")}
           <input
             type="text"
             name="name"
@@ -54,7 +56,7 @@ function RegisterPage() {
         </label>
 
         <label>
-          Email
+          {t("auth.email")}
           <input
             type="email"
             name="email"
@@ -65,7 +67,7 @@ function RegisterPage() {
         </label>
 
         <label>
-          Password
+          {t("auth.password")}
           <input
             type="password"
             name="password"
@@ -77,23 +79,23 @@ function RegisterPage() {
         </label>
 
         <label>
-          Role
+          {t("auth.role")}
           <select name="role" value={formData.role} onChange={handleChange}>
-            <option value="customer">Customer</option>
-            <option value="farmer">Farmer</option>
-            <option value="vendor">Vendor</option>
+            <option value="customer">{t("auth.customer")}</option>
+            <option value="farmer">{t("auth.farmer")}</option>
+            <option value="vendor">{t("auth.vendor")}</option>
           </select>
         </label>
 
         {error ? <p className="error-text">{error}</p> : null}
 
         <button type="submit" className="btn btn-primary" disabled={loading}>
-          {loading ? "Creating account..." : "Register"}
+          {loading ? t("auth.creating") : t("auth.register")}
         </button>
       </form>
 
       <p className="auth-meta">
-        Already have an account? <Link to="/login">Login</Link>
+        {t("auth.already")} <Link to="/login">{t("auth.loginTitle")}</Link>
       </p>
     </section>
   );

@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import productService from "../services/productService";
 import aiService from "../services/aiService";
 import { CATEGORY_OPTIONS } from "../utils/constants";
 import { getApiErrorMessage } from "../utils/apiError";
+import { FALLBACK_IMAGE } from "../utils/image";
+import { useLanguage } from "../context/LanguageContext";
 
 function AddProductPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const [form, setForm] = useState({
     title: "",
@@ -21,10 +24,10 @@ function AddProductPage() {
     minWholesaleQty: "",
     quantity: "",
     location: "",
-    imageUrls: "",
     benefits: "",
     tags: "",
   });
+  const [imageFiles, setImageFiles] = useState([]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -41,6 +44,29 @@ function AddProductPage() {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+  const handleImageSelection = (event) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    if (selectedFiles.length > 8) {
+      setError("You can upload up to 8 images only.");
+      setImageFiles(selectedFiles.slice(0, 8));
+      return;
+    }
+
+    setError("");
+    setImageFiles(selectedFiles);
+  };
+
+  const previews = useMemo(
+    () => imageFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
+    [imageFiles]
+  );
+
+  useEffect(() => {
+    return () => {
+      previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+    };
+  }, [previews]);
 
   const handleGenerateAI = async () => {
     setError("");
@@ -82,11 +108,6 @@ function AddProductPage() {
     setSubmitting(true);
 
     try {
-      const images = form.imageUrls
-        .split(",")
-        .map((entry) => entry.trim())
-        .filter(Boolean);
-
       await productService.createProduct({
         title: form.title,
         description: form.description,
@@ -98,7 +119,7 @@ function AddProductPage() {
         minWholesaleQty: Number(form.minWholesaleQty),
         quantity: Number(form.quantity),
         location: form.location,
-        images,
+        imageFiles,
       });
 
       setSuccess("Product created successfully.");
@@ -113,17 +134,17 @@ function AddProductPage() {
   return (
     <section className="page-card add-product-wrap">
       <div className="section-head">
-        <h2>Add Product</h2>
+        <h2>{t("add.title")}</h2>
       </div>
 
       <form className="add-product-form" onSubmit={handleSubmit}>
         <label>
-          Product Name
+          {t("add.productName")}
           <input name="title" value={form.title} onChange={handleChange} required />
         </label>
 
         <label>
-          Category
+          {t("add.category")}
           <select name="category" value={form.category} onChange={handleChange}>
             {CATEGORY_OPTIONS.map((category) => (
               <option key={category} value={category}>
@@ -134,31 +155,31 @@ function AddProductPage() {
         </label>
 
         <label>
-          Subcategory
+          {t("add.subcategory")}
           <input name="subcategory" value={form.subcategory} onChange={handleChange} />
         </label>
 
         <label>
-          Location
+          {t("add.location")}
           <input name="location" value={form.location} onChange={handleChange} required />
         </label>
 
         <label>
-          Type
+          {t("add.type")}
           <select name="type" value={form.type} onChange={handleChange}>
-            <option value="organic">Organic</option>
-            <option value="non-organic">Non-organic</option>
+            <option value="organic">{t("add.organic")}</option>
+            <option value="non-organic">{t("add.nonOrganic")}</option>
           </select>
         </label>
 
         <div className="ai-action-row">
           <button type="button" className="btn btn-outline" onClick={handleGenerateAI} disabled={generating}>
-            {generating ? "Generating AI content..." : "Generate AI Description"}
+            {generating ? t("add.generatingAi") : t("add.generateAi")}
           </button>
         </div>
 
         <label className="full-width">
-          Description
+          {t("add.description")}
           <textarea
             name="description"
             value={form.description}
@@ -169,17 +190,17 @@ function AddProductPage() {
         </label>
 
         <label className="full-width">
-          Benefits (auto-filled by AI)
+          {t("add.benefits")}
           <textarea name="benefits" value={form.benefits} onChange={handleChange} rows="4" />
         </label>
 
         <label className="full-width">
-          Tags (comma separated)
+          {t("add.tags")}
           <input name="tags" value={form.tags} onChange={handleChange} />
         </label>
 
         <label>
-          Retail Price
+          {t("add.retail")}
           <input
             type="number"
             min="0"
@@ -192,7 +213,7 @@ function AddProductPage() {
         </label>
 
         <label>
-          Wholesale Price
+          {t("add.wholesale")}
           <input
             type="number"
             min="0"
@@ -205,7 +226,7 @@ function AddProductPage() {
         </label>
 
         <label>
-          Min Wholesale Quantity
+          {t("add.minWholesale")}
           <input
             type="number"
             min="1"
@@ -217,7 +238,7 @@ function AddProductPage() {
         </label>
 
         <label>
-          Available Quantity
+          {t("add.available")}
           <input
             type="number"
             min="0"
@@ -228,17 +249,34 @@ function AddProductPage() {
           />
         </label>
 
-        <label className="full-width">
-          Image URLs (comma separated)
-          <input name="imageUrls" value={form.imageUrls} onChange={handleChange} />
+        <label className="full-width image-input-label">
+          {t("add.upload")}
+          <input type="file" accept="image/*" multiple onChange={handleImageSelection} />
+          <span className="muted">{t("add.uploadHint")}</span>
         </label>
+
+        <div className="full-width upload-preview-grid">
+          {previews.length > 0 ? (
+            previews.map((preview) => (
+              <figure key={preview.url} className="upload-preview-card">
+                <img src={preview.url} alt={preview.name} />
+                <figcaption>{preview.name}</figcaption>
+              </figure>
+            ))
+          ) : (
+            <figure className="upload-preview-card empty">
+              <img src={FALLBACK_IMAGE} alt="No image selected" />
+              <figcaption>{t("add.noImage")}</figcaption>
+            </figure>
+          )}
+        </div>
 
         {error ? <p className="error-text full-width">{error}</p> : null}
         {success ? <p className="success-text full-width">{success}</p> : null}
 
         <div className="full-width">
           <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {submitting ? "Saving Product..." : "Create Product"}
+            {submitting ? t("add.saving") : t("add.create")}
           </button>
         </div>
       </form>

@@ -39,9 +39,18 @@ const parseNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null;
 };
 
+const buildUploadBaseUrl = (req) => {
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const forwardedHost = req.headers["x-forwarded-host"];
+  const protocol = forwardedProto ? String(forwardedProto).split(",")[0].trim() : req.protocol;
+  const host = forwardedHost ? String(forwardedHost).split(",")[0].trim() : req.get("host");
+  return `${protocol}://${host}`;
+};
+
 const parseImages = (bodyImages, files, req) => {
+  const uploadBaseUrl = buildUploadBaseUrl(req);
   const uploadedUrls = (files || []).map(
-    (file) => `${req.protocol}://${req.get("host")}/uploads/${file.filename}`
+    (file) => `${uploadBaseUrl}/uploads/${file.filename}`
   );
 
   if (!bodyImages) {
