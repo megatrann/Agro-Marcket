@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
+import logoMark from "../assets/logo-mark.svg";
 
 function Navbar() {
   const { isAuthenticated, logout, user } = useAuth();
@@ -19,7 +20,10 @@ function Navbar() {
     <header className="navbar">
       <div className="container navbar-content">
         <NavLink to="/" className="brand-link">
-          <h1 className="brand">Agri Market</h1>
+          <div className="brand-wrap">
+            <img src={logoMark} alt={t("nav.brandAlt")} className="brand-logo" />
+            <h1 className="brand">Agri Market</h1>
+          </div>
         </NavLink>
         <button
           type="button"

@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import Loader from "../components/Loader";
 import adminService from "../services/adminService";
 import { getApiErrorMessage } from "../utils/apiError";
+import { useLanguage } from "../context/LanguageContext";
 
 function AdminDashboardPage() {
+  const { t } = useLanguage();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -26,7 +28,7 @@ function AdminDashboardPage() {
   }, []);
 
   if (loading) {
-    return <Loader label="Loading dashboard..." />;
+    return <Loader label={t("admin.loadingDashboard")} />;
   }
 
   if (error) {
@@ -36,23 +38,23 @@ function AdminDashboardPage() {
   return (
     <section className="admin-grid">
       <article className="admin-stat-card page-card stat-users">
-        <p className="stat-label">Platform Reach</p>
-        <h3>Total Users</h3>
+        <p className="stat-label">{t("admin.platformReach")}</p>
+        <h3>{t("admin.totalUsers")}</h3>
         <p className="stat-value">{stats?.totalUsers ?? 0}</p>
       </article>
       <article className="admin-stat-card page-card stat-sellers">
-        <p className="stat-label">Supply Network</p>
-        <h3>Total Farmers/Vendors</h3>
+        <p className="stat-label">{t("admin.supplyNetwork")}</p>
+        <h3>{t("admin.totalFarmerVendors")}</h3>
         <p className="stat-value">{stats?.totalFarmerVendors ?? 0}</p>
       </article>
       <article className="admin-stat-card page-card stat-products">
-        <p className="stat-label">Marketplace Depth</p>
-        <h3>Total Products</h3>
+        <p className="stat-label">{t("admin.marketplaceDepth")}</p>
+        <h3>{t("admin.totalProducts")}</h3>
         <p className="stat-value">{stats?.totalProducts ?? 0}</p>
       </article>
       <article className="admin-stat-card page-card stat-orders">
-        <p className="stat-label">Transaction Flow</p>
-        <h3>Total Orders</h3>
+        <p className="stat-label">{t("admin.transactionFlow")}</p>
+        <h3>{t("admin.totalOrders")}</h3>
         <p className="stat-value">{stats?.totalOrders ?? 0}</p>
       </article>
     </section>

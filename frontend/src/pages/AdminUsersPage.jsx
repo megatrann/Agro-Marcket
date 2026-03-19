@@ -3,8 +3,10 @@ import Loader from "../components/Loader";
 import adminService from "../services/adminService";
 import { getApiErrorMessage } from "../utils/apiError";
 import { formatDate } from "../utils/format";
+import { useLanguage } from "../context/LanguageContext";
 
 function AdminUsersPage() {
+  const { t } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -45,14 +47,14 @@ function AdminUsersPage() {
   };
 
   if (loading) {
-    return <Loader label="Loading users..." />;
+    return <Loader label={t("admin.loadingUsers")} />;
   }
 
   return (
     <section className="page-card">
       <div className="section-head">
-        <h2>User Management</h2>
-        <p className="muted">{users.length} users</p>
+        <h2>{t("admin.userManagement")}</h2>
+        <p className="muted">{t("admin.usersCount", { count: users.length })}</p>
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}
@@ -61,11 +63,11 @@ function AdminUsersPage() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Joined</th>
-              <th>Actions</th>
+              <th>{t("auth.name")}</th>
+              <th>{t("auth.email")}</th>
+              <th>{t("auth.role")}</th>
+              <th>{t("admin.joined")}</th>
+              <th>{t("admin.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -75,16 +77,16 @@ function AdminUsersPage() {
                 <td>{user.email}</td>
                 <td>
                   <select value={user.role} onChange={(event) => handleRoleChange(user.id, event.target.value)}>
-                    <option value="customer">customer</option>
-                    <option value="farmer">farmer</option>
-                    <option value="vendor">vendor</option>
-                    <option value="admin">admin</option>
+                    <option value="customer">{t("auth.customer")}</option>
+                    <option value="farmer">{t("auth.farmer")}</option>
+                    <option value="vendor">{t("auth.vendor")}</option>
+                    <option value="admin">{t("admin.admin")}</option>
                   </select>
                 </td>
                 <td>{formatDate(user.createdAt)}</td>
                 <td>
                   <button type="button" className="btn btn-outline" onClick={() => handleDelete(user.id)}>
-                    Delete
+                    {t("admin.delete")}
                   </button>
                 </td>
               </tr>

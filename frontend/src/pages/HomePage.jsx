@@ -64,7 +64,7 @@ function HomePage() {
         <div className="chip-grid">
           {CATEGORY_OPTIONS.map((category) => (
             <Link key={category} to={`/products?category=${encodeURIComponent(category)}`} className="chip-link">
-              {category}
+              {t(`category.${category}`)}
             </Link>
           ))}
         </div>

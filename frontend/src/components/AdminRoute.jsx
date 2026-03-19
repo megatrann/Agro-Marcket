@@ -1,12 +1,14 @@
 import { Navigate } from "react-router-dom";
 import Loader from "./Loader";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 
 function AdminRoute({ children }) {
   const { loading, isAuthenticated, user } = useAuth();
+  const { t } = useLanguage();
 
   if (loading) {
-    return <Loader label="Checking access..." />;
+    return <Loader label={t("common.checkingAccess")} />;
   }
 
   if (!isAuthenticated) {

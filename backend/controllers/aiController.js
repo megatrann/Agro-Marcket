@@ -2,7 +2,7 @@ const { generateProductDescription } = require("../services/aiDescriptionService
 
 const generateDescription = async (req, res) => {
   try {
-    const { productName, category, location, type } = req.body;
+    const { productName, category, location, type, language } = req.body;
 
     if (!productName || !category || !location || !type) {
       return res.status(400).json({
@@ -15,6 +15,7 @@ const generateDescription = async (req, res) => {
       category: String(category).trim(),
       location: String(location).trim(),
       type: String(type).trim(),
+      language: String(language || "en").trim().toLowerCase(),
     });
 
     return res.status(200).json(content);

@@ -87,7 +87,7 @@ function ProductsPage() {
               <option value="">{t("products.all")}</option>
               {CATEGORY_OPTIONS.map((category) => (
                 <option key={category} value={category}>
-                  {category}
+                  {t(`category.${category}`)}
                 </option>
               ))}
             </select>

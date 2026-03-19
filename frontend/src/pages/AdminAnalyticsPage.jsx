@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import adminService from "../services/adminService";
+import { formatCurrency } from "../utils/format";
+import { useLanguage } from "../context/LanguageContext";
 
 function AdminAnalyticsPage() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [overview, setOverview] = useState(null);
@@ -35,18 +38,18 @@ function AdminAnalyticsPage() {
       setTopFarmers(farmersResponse.topFarmers || []);
       setLocationDemand(locationResponse.locationDemand || []);
     } catch (err) {
-      setError(err?.response?.data?.message || "Failed to load analytics");
+      setError(err?.response?.data?.message || t("admin.analyticsFailed"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadAnalytics();
   }, [loadAnalytics]);
 
   if (loading) {
-    return <p>Loading analytics...</p>;
+    return <p>{t("admin.loadingAnalytics")}</p>;
   }
 
   if (error) {
@@ -56,74 +59,74 @@ function AdminAnalyticsPage() {
   return (
     <section>
       <div className="page-header-row">
-        <h1>Analytics</h1>
+        <h1>{t("admin.analytics")}</h1>
         <button type="button" className="btn secondary" onClick={loadAnalytics}>
-          Refresh
+          {t("admin.refresh")}
         </button>
       </div>
 
       <div className="stats-grid" style={{ marginBottom: "1rem" }}>
         <article className="stat-card">
-          <p>Total Users</p>
+          <p>{t("admin.totalUsers")}</p>
           <h3>{overview?.totalUsers ?? 0}</h3>
         </article>
         <article className="stat-card">
-          <p>Total Farmers</p>
+          <p>{t("admin.totalFarmers")}</p>
           <h3>{overview?.totalFarmers ?? 0}</h3>
         </article>
         <article className="stat-card">
-          <p>Total Products</p>
+          <p>{t("admin.totalProducts")}</p>
           <h3>{overview?.totalProducts ?? 0}</h3>
         </article>
         <article className="stat-card">
-          <p>Total Orders</p>
+          <p>{t("admin.totalOrders")}</p>
           <h3>{overview?.totalOrders ?? 0}</h3>
         </article>
         <article className="stat-card">
-          <p>Total Revenue</p>
-          <h3>Rs {Number(overview?.totalRevenue || 0).toFixed(2)}</h3>
+          <p>{t("admin.totalRevenue")}</p>
+          <h3>{formatCurrency(overview?.totalRevenue || 0)}</h3>
         </article>
       </div>
 
       <div className="page-card" style={{ marginBottom: "1rem" }}>
-        <h2>Sales By Category</h2>
+        <h2>{t("admin.salesByCategory")}</h2>
         <ul>
           {salesByCategory.map((item) => (
             <li key={item.category}>
-              {item.category}: {item.unitsSold} units, Rs {Number(item.revenue || 0).toFixed(2)}
+              {t(`category.${item.category}`)}: {item.unitsSold} {t("admin.units")}, {formatCurrency(item.revenue || 0)}
             </li>
           ))}
         </ul>
       </div>
 
       <div className="page-card" style={{ marginBottom: "1rem" }}>
-        <h2>Top Products</h2>
+        <h2>{t("admin.topProducts")}</h2>
         <ul>
           {topProducts.map((item) => (
             <li key={item.id}>
-              {item.title}: {item.unitsSold} units, Rs {Number(item.revenue || 0).toFixed(2)}
+              {item.title}: {item.unitsSold} {t("admin.units")}, {formatCurrency(item.revenue || 0)}
             </li>
           ))}
         </ul>
       </div>
 
       <div className="page-card" style={{ marginBottom: "1rem" }}>
-        <h2>Top Farmers</h2>
+        <h2>{t("admin.topFarmers")}</h2>
         <ul>
           {topFarmers.map((item) => (
             <li key={item.id}>
-              {item.name}: {item.unitsSold} units, Rs {Number(item.revenue || 0).toFixed(2)}
+              {item.name}: {item.unitsSold} {t("admin.units")}, {formatCurrency(item.revenue || 0)}
             </li>
           ))}
         </ul>
       </div>
 
       <div className="page-card">
-        <h2>Location Demand</h2>
+        <h2>{t("admin.locationDemand")}</h2>
         <ul>
           {locationDemand.map((item) => (
             <li key={item.location}>
-              {item.location}: {item.orderCount} orders, {item.unitsDemanded} units
+              {item.location}: {item.orderCount} {t("admin.orders")}, {item.unitsDemanded} {t("admin.units")}
             </li>
           ))}
         </ul>

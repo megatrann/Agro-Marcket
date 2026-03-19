@@ -52,7 +52,7 @@ function OrdersPage() {
               <header className="order-head">
                 <h3>{t("orders.order")} #{order.id}</h3>
                 <span className={`order-status ${ORDER_STATUS_COLORS[order.status] || ""}`}>
-                  {order.status}
+                  {t(`status.${order.status}`)}
                 </span>
               </header>
               <p className="muted">{t("orders.placed")}: {formatDate(order.createdAt)}</p>

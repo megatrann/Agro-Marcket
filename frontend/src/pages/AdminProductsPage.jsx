@@ -3,8 +3,10 @@ import Loader from "../components/Loader";
 import adminService from "../services/adminService";
 import { getApiErrorMessage } from "../utils/apiError";
 import { formatCurrency } from "../utils/format";
+import { useLanguage } from "../context/LanguageContext";
 
 function AdminProductsPage() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -36,14 +38,14 @@ function AdminProductsPage() {
   };
 
   if (loading) {
-    return <Loader label="Loading products..." />;
+    return <Loader label={t("admin.loadingProducts")} />;
   }
 
   return (
     <section className="page-card">
       <div className="section-head">
-        <h2>Product Management</h2>
-        <p className="muted">{products.length} products</p>
+        <h2>{t("admin.productManagement")}</h2>
+        <p className="muted">{t("admin.productsCount", { count: products.length })}</p>
       </div>
 
       {error ? <p className="error-text">{error}</p> : null}
@@ -52,12 +54,12 @@ function AdminProductsPage() {
         <table className="admin-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Seller</th>
-              <th>Retail Price</th>
-              <th>Location</th>
-              <th>Organic</th>
-              <th>Actions</th>
+              <th>{t("admin.title")}</th>
+              <th>{t("admin.seller")}</th>
+              <th>{t("add.retail")}</th>
+              <th>{t("product.location")}</th>
+              <th>{t("products.organic")}</th>
+              <th>{t("admin.actions")}</th>
             </tr>
           </thead>
           <tbody>
@@ -67,10 +69,10 @@ function AdminProductsPage() {
                 <td>{product.seller?.name || "-"}</td>
                 <td>{formatCurrency(product.retailPrice)}</td>
                 <td>{product.location}</td>
-                <td>{product.organic ? "Yes" : "No"}</td>
+                <td>{product.organic ? t("admin.yes") : t("admin.no")}</td>
                 <td>
                   <button type="button" className="btn btn-outline" onClick={() => handleDelete(product.id)}>
-                    Delete
+                    {t("admin.delete")}
                   </button>
                 </td>
               </tr>

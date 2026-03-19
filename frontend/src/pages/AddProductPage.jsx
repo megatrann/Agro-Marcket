@@ -11,7 +11,7 @@ import { useLanguage } from "../context/LanguageContext";
 function AddProductPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const [form, setForm] = useState({
     title: "",
@@ -48,7 +48,7 @@ function AddProductPage() {
   const handleImageSelection = (event) => {
     const selectedFiles = Array.from(event.target.files || []);
     if (selectedFiles.length > 8) {
-      setError("You can upload up to 8 images only.");
+      setError(t("add.tooManyImages"));
       setImageFiles(selectedFiles.slice(0, 8));
       return;
     }
@@ -73,7 +73,7 @@ function AddProductPage() {
     setSuccess("");
 
     if (!form.title || !form.category || !form.location) {
-      setError("Please enter product name, category, and location before AI generation.");
+      setError(t("add.aiNeedsBasics"));
       return;
     }
 
@@ -84,6 +84,7 @@ function AddProductPage() {
         category: form.category,
         location: form.location,
         type: form.type === "organic" ? "organic" : "non-organic",
+        language,
       });
 
       setForm((prev) => ({
@@ -93,9 +94,9 @@ function AddProductPage() {
         benefits: Array.isArray(result.benefits) ? result.benefits.join("\n") : prev.benefits,
         tags: Array.isArray(result.tags) ? result.tags.join(", ") : prev.tags,
       }));
-      setSuccess("AI content generated successfully.");
+      setSuccess(t("add.aiGenerated"));
     } catch (err) {
-      setError(getApiErrorMessage(err, "Failed to generate AI content."));
+      setError(getApiErrorMessage(err, t("add.aiFailed")));
     } finally {
       setGenerating(false);
     }
@@ -122,10 +123,10 @@ function AddProductPage() {
         imageFiles,
       });
 
-      setSuccess("Product created successfully.");
+      setSuccess(t("add.createSuccess"));
       setTimeout(() => navigate("/products"), 800);
     } catch (err) {
-      setError(getApiErrorMessage(err, "Failed to create product."));
+      setError(getApiErrorMessage(err, t("add.createFailed")));
     } finally {
       setSubmitting(false);
     }
@@ -148,7 +149,7 @@ function AddProductPage() {
           <select name="category" value={form.category} onChange={handleChange}>
             {CATEGORY_OPTIONS.map((category) => (
               <option key={category} value={category}>
-                {category}
+                {t(`category.${category}`)}
               </option>
             ))}
           </select>

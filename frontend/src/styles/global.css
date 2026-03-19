@@ -74,6 +74,19 @@ a {
   text-decoration: none;
 }
 
+.brand-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(18, 48, 26, 0.24);
+}
+
 .brand {
   font-size: 1.35rem;
   letter-spacing: 0.15px;
@@ -988,6 +1001,11 @@ select:focus {
 
   .hero-card {
     padding: 24px;
+  }
+
+  .brand-logo {
+    width: 34px;
+    height: 34px;
   }
 
   .nav-links {
