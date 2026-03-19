@@ -83,4 +83,29 @@ async function startServer() {
   }
 }
 
-startServer();
+let dbConnectPromise = null;
+
+const ensureDatabaseConnection = async () => {
+  if (!dbConnectPromise) {
+    dbConnectPromise = connectDatabase().catch((error) => {
+      dbConnectPromise = null;
+      throw error;
+    });
+  }
+
+  return dbConnectPromise;
+};
+
+if (process.env.VERCEL === "1") {
+  module.exports = async (req, res) => {
+    try {
+      await ensureDatabaseConnection();
+      return app(req, res);
+    } catch (error) {
+      console.error("Failed to handle request:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+} else {
+  startServer();
+}
