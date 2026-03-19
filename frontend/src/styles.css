@@ -1,0 +1,93 @@
+:root {
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  color: #1f2a1f;
+  background-color: #f3f7ef;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #eef7e8 0%, #f9fcf7 100%);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.container {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+
+.navbar {
+  background-color: #2f5d2f;
+  color: #ffffff;
+  position: sticky;
+  top: 0;
+}
+
+.navbar-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.nav-links {
+  display: flex;
+  gap: 16px;
+}
+
+.nav-links a {
+  color: #e7f5e4;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.nav-links a.active {
+  text-decoration: underline;
+}
+
+.main-content {
+  width: min(1100px, 92%);
+  margin: 32px auto;
+}
+
+.page-card {
+  background-color: #ffffff;
+  border: 1px solid #d8e7d1;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 8px 22px rgba(47, 93, 47, 0.08);
+}
+
+.page-card h2 {
+  margin-bottom: 10px;
+  color: #234523;
+}
+
+.page-card p {
+  color: #435543;
+}
+
+@media (max-width: 720px) {
+  .navbar-content {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
