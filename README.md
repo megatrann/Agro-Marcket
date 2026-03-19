@@ -32,6 +32,19 @@ This repository contains a foundation-level full-stack setup for an agriculture 
 3. Start dev server: `npm run dev`
 4. Open app on the URL printed by Vite terminal output
 
+## GitHub Pages (Frontend)
+1. This repo includes workflow: `.github/workflows/deploy-pages.yml`
+2. In GitHub repo settings:
+  - Go to `Settings -> Pages`
+  - Set source to `GitHub Actions`
+3. Optional but recommended: add repository secrets
+  - `VITE_API_URL`
+  - `REACT_APP_API_URL`
+4. Push to `main` to trigger deployment.
+5. Live URL (for this repo name): `https://megatrann.github.io/Agro-Marcket/`
+
+Note: GitHub Pages hosts only the frontend (static). Backend API must be hosted separately.
+
 ## Local Environment Note (macOS)
 - Backend defaults to port `5000`. If this port is occupied on your system, update `PORT` in backend `.env`.
 
