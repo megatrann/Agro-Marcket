@@ -36,7 +36,8 @@ This repository contains a foundation-level full-stack setup for an agriculture 
 1. This repo includes workflow: `.github/workflows/deploy-pages.yml`
 2. In GitHub repo settings:
   - Go to `Settings -> Pages`
-  - Set source to `GitHub Actions`
+  - Set source to `Deploy from a branch`
+  - Branch: `gh-pages`, folder: `/ (root)`
 3. Optional but recommended: add repository secrets
   - `VITE_API_URL`
   - `REACT_APP_API_URL`
