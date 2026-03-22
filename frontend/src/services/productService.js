@@ -3,6 +3,11 @@ import api from "./api";
 const productService = {
   getProducts: async (filters = {}) => {
     const response = await api.get("/products", { params: filters });
+
+    if (!response?.data || typeof response.data !== "object" || !Array.isArray(response.data.products)) {
+      throw new Error("Invalid products API response. Check VITE_API_URL configuration.");
+    }
+
     return response.data;
   },
 
