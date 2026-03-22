@@ -77,7 +77,9 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(express.json());
+// Serve uploaded images statically
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.get("/api/health", (req, res) => {

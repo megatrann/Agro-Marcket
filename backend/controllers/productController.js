@@ -222,7 +222,7 @@ const createProduct = async (req, res) => {
       product: sanitizeProduct(product),
     });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to create product" });
+    return res.status(500).json({ message: "Failed to create product", error: error.message, stack: error.stack });
   }
 };
 
