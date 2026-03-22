@@ -1,10 +1,13 @@
 import axios from "axios";
 
+const FALLBACK_BACKEND_URL =
+  "https://agro-marcket-backend-1tnnh40cl-megatranns-projects.vercel.app";
+
 const normalizeApiBaseURL = (value) => {
   const raw = String(value || "").trim();
 
   if (!raw) {
-    return "/api";
+    return `${FALLBACK_BACKEND_URL}/api`;
   }
 
   if (raw.startsWith("/")) {
