@@ -21,6 +21,38 @@ const allowedOrigins = (process.env.CLIENT_URL || "")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const normalizeOrigin = (origin) => {
+  try {
+    return new URL(origin).origin;
+  } catch (_error) {
+    return null;
+  }
+};
+
+const allowedOriginSet = new Set(
+  allowedOrigins
+    .map((origin) => normalizeOrigin(origin) || origin)
+    .filter(Boolean)
+);
+
+const isTrustedPreviewOrigin = (origin) => {
+  const normalized = normalizeOrigin(origin);
+  if (!normalized) {
+    return false;
+  }
+
+  try {
+    const { hostname } = new URL(normalized);
+    return (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".vercel.app")
+    );
+  } catch (_error) {
+    return false;
+  }
+};
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -29,8 +61,14 @@ app.use(
         return callback(null, true);
       }
 
+      const normalizedRequestOrigin = normalizeOrigin(origin) || origin;
+
       // If CLIENT_URL is not configured, allow all origins to avoid blocking dev/test.
-      if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.length === 0 ||
+        allowedOriginSet.has(normalizedRequestOrigin) ||
+        isTrustedPreviewOrigin(normalizedRequestOrigin)
+      ) {
         return callback(null, true);
       }
 
