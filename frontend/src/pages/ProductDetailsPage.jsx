@@ -12,7 +12,7 @@ import { useLanguage } from "../context/LanguageContext";
 function ProductDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { addToCart } = useCart();
   const { t } = useLanguage();
 
@@ -54,6 +54,24 @@ function ProductDetailsPage() {
     }
   };
 
+  const handleDeleteProduct = async () => {
+    if (!product?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm("Are you sure you want to delete this product?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await productService.deleteProduct(product.id);
+      navigate("/products");
+    } catch (err) {
+      setError(getApiErrorMessage(err, "Unable to delete product."));
+    }
+  };
+
   if (loading) {
     return <Loader label={t("product.loading")} />;
   }
@@ -72,6 +90,9 @@ function ProductDetailsPage() {
       : [FALLBACK_IMAGE];
   const activeImage = selectedImage || images[0];
   const activeImageIndex = Math.max(0, images.findIndex((image) => image === activeImage));
+  const isOwner = Boolean(user?.id && product?.sellerId && user.id === product.sellerId);
+  const isAdmin = user?.role === "admin";
+  const canDeleteProduct = isOwner || isAdmin;
 
   return (
     <section className="product-detail page-card">
@@ -133,9 +154,16 @@ function ProductDetailsPage() {
           <p>{t("auth.role")}: {product.seller?.role || t("common.na")}</p>
         </div>
 
-        <button type="button" className="btn btn-primary" onClick={handleAddToCart}>
-          {t("product.addToCart")}
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <button type="button" className="btn btn-primary" onClick={handleAddToCart}>
+            {t("product.addToCart")}
+          </button>
+          {canDeleteProduct ? (
+            <button type="button" className="btn btn-outline" onClick={handleDeleteProduct}>
+              {t("admin.delete")}
+            </button>
+          ) : null}
+        </div>
       </div>
     </section>
   );

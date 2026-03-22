@@ -44,6 +44,11 @@ const productService = {
     const response = await api.post("/products", payload);
     return response.data;
   },
+
+  deleteProduct: async (id) => {
+    const response = await api.delete(`/products/${id}`);
+    return response.data;
+  },
 };
 
 export default productService;

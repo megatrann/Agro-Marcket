@@ -10,6 +10,16 @@ const orderService = {
     const response = await api.get("/orders/my-orders");
     return response.data;
   },
+
+  getSellerOrders: async () => {
+    const response = await api.get("/orders/seller-orders");
+    return response.data;
+  },
+
+  updateOrderStatus: async (id, status) => {
+    const response = await api.put(`/orders/update-status/${id}`, { status });
+    return response.data;
+  },
 };
 
 export default orderService;
