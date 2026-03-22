@@ -1,6 +1,27 @@
 import axios from "axios";
 
-const baseURL = import.meta.env.VITE_API_URL || "/api";
+const normalizeApiBaseURL = (value) => {
+  const raw = String(value || "").trim();
+
+  if (!raw) {
+    return "/api";
+  }
+
+  if (raw.startsWith("/")) {
+    return raw;
+  }
+
+  if (/^https?:\/\//i.test(raw)) {
+    const withoutTrailingSlash = raw.replace(/\/+$/, "");
+    return withoutTrailingSlash.endsWith("/api")
+      ? withoutTrailingSlash
+      : `${withoutTrailingSlash}/api`;
+  }
+
+  return raw;
+};
+
+const baseURL = normalizeApiBaseURL(import.meta.env.VITE_API_URL || "/api");
 
 let unauthorizedHandler = null;
 
