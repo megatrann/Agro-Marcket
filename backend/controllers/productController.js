@@ -11,7 +11,7 @@ const CATEGORIES = [
   "Vehicles",
 ];
 
-const CREATOR_ROLES = ["farmer", "vendor"];
+const CREATOR_ROLES = ["farmer", "vendor", "admin"];
 
 const parseBoolean = (value) => {
   if (typeof value === "boolean") {
@@ -109,6 +109,7 @@ const sanitizeProduct = (product) => {
     sellerId: sellerDoc ? sellerDoc.id || sellerDoc._id.toString() : String(product.sellerId),
     createdAt: product.createdAt,
     updatedAt: product.updatedAt,
+    isArchived: Boolean(product.isArchived),
     seller: serializeSeller(sellerDoc),
   };
 };
@@ -179,7 +180,7 @@ const createProduct = async (req, res) => {
   try {
     if (!CREATOR_ROLES.includes(req.user.role)) {
       return res.status(403).json({
-        message: "Only farmers or vendors can create products",
+        message: "Only farmers, vendors, or admins can create products",
       });
     }
 
@@ -228,7 +229,7 @@ const createProduct = async (req, res) => {
 const listProducts = async (req, res) => {
   try {
     const { category, location, organic, minPrice, maxPrice } = req.query;
-    const where = {};
+    const where = { isArchived: { $ne: true } };
 
     if (category) {
       where.category = category;
@@ -268,13 +269,39 @@ const listProducts = async (req, res) => {
   }
 };
 
+const listMyProducts = async (req, res) => {
+  try {
+    if (!CREATOR_ROLES.includes(req.user.role) && req.user.role !== "admin") {
+      return res.status(403).json({ message: "Only farmers, vendors, or admins can access this" });
+    }
+
+    const where = req.user.role === "admin"
+      ? { isArchived: { $ne: true } }
+      : { sellerId: req.user.id, isArchived: { $ne: true } };
+
+    const products = await Product.find(where)
+      .populate("sellerId", "name email role")
+      .sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      count: products.length,
+      products: products.map(sanitizeProduct),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch my products" });
+  }
+};
+
 const getProductById = async (req, res) => {
   try {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ message: "Invalid product id" });
     }
 
-    const product = await Product.findById(req.params.id).populate("sellerId", "name email role");
+    const product = await Product.findOne({
+      _id: req.params.id,
+      isArchived: { $ne: true },
+    }).populate("sellerId", "name email role");
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
@@ -294,7 +321,7 @@ const updateProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid product id" });
     }
 
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ _id: req.params.id, isArchived: { $ne: true } });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -367,7 +394,7 @@ const deleteProduct = async (req, res) => {
       return res.status(400).json({ message: "Invalid product id" });
     }
 
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findOne({ _id: req.params.id, isArchived: { $ne: true } });
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
@@ -381,7 +408,8 @@ const deleteProduct = async (req, res) => {
       });
     }
 
-    await Product.deleteOne({ _id: product._id });
+    product.isArchived = true;
+    await product.save();
     return res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     return res.status(500).json({ message: "Failed to delete product" });
@@ -391,6 +419,7 @@ const deleteProduct = async (req, res) => {
 module.exports = {
   createProduct,
   listProducts,
+  listMyProducts,
   getProductById,
   updateProduct,
   deleteProduct,

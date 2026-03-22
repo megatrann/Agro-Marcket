@@ -102,7 +102,7 @@ const getDashboardStats = async (_req, res) => {
     const [totalUsers, totalFarmerVendors, totalProducts, totalOrders] = await Promise.all([
       User.countDocuments(),
       User.countDocuments({ role: { $in: ["farmer", "vendor"] } }),
-      Product.countDocuments(),
+      Product.countDocuments({ isArchived: { $ne: true } }),
       Order.countDocuments(),
     ]);
 
@@ -191,7 +191,7 @@ const updateUserRole = async (req, res) => {
 
 const getAllProducts = async (_req, res) => {
   try {
-    const products = await Product.find({})
+    const products = await Product.find({ isArchived: { $ne: true } })
       .populate("sellerId", "name email role")
       .sort({ createdAt: -1 });
 
@@ -217,7 +217,8 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    await Product.deleteOne({ _id: productId });
+    product.isArchived = true;
+    await product.save();
 
     return res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {

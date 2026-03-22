@@ -41,10 +41,14 @@ function Navbar() {
           <NavLink to="/">{t("nav.home")}</NavLink>
           <NavLink to="/products">{t("nav.products")}</NavLink>
           {["farmer", "vendor", "admin"].includes(user?.role) ? (
-            <NavLink to="/products/new">{t("nav.addProduct")}</NavLink>
+            <>
+              <NavLink to="/products/new">{t("nav.addProduct")}</NavLink>
+              <NavLink to="/my-products">My Products</NavLink>
+            </>
           ) : null}
           <NavLink to="/cart">{t("nav.cart")} ({totalItems})</NavLink>
           <NavLink to="/orders">{t("nav.orders")}</NavLink>
+          {isAuthenticated ? <NavLink to="/profile">Profile</NavLink> : null}
           {user?.role === "admin" ? <NavLink to="/admin/dashboard">{t("nav.admin")}</NavLink> : null}
           <label className="language-switcher" aria-label={t("nav.language")}>
             <span>{t("nav.language")}</span>

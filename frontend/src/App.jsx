@@ -12,6 +12,8 @@ import ProductDetailsPage from "./pages/ProductDetailsPage";
 import AddProductPage from "./pages/AddProductPage";
 import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
+import MyProductsPage from "./pages/MyProductsPage";
+import ProfilePage from "./pages/ProfilePage";
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import AdminAnalyticsPage from "./pages/AdminAnalyticsPage";
 import AdminUsersPage from "./pages/AdminUsersPage";
@@ -35,8 +37,24 @@ function App() {
             }
           />
           <Route path="/product/:id" element={<ProductDetailsPage />} />
+          <Route
+            path="/my-products"
+            element={
+              <ProtectedRoute>
+                <MyProductsPage />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
           <Route
             path="/cart"
             element={

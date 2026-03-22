@@ -36,8 +36,18 @@ function OrdersPage() {
 
   const handleStatusChange = async (id, status) => {
     try {
-      await orderService.updateOrderStatus(id, status);
-      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, status } : order)));
+      const data = await orderService.updateOrderStatus(id, status);
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === id
+            ? {
+                ...order,
+                status: data.order?.status || order.status,
+                sellerStatus: data.order?.sellerStatus || status,
+              }
+            : order
+        )
+      );
     } catch (err) {
       setError(getApiErrorMessage(err, "Unable to update order status."));
     }
@@ -66,7 +76,7 @@ function OrdersPage() {
                 <h3>{t("orders.order")} #{order.id}</h3>
                 {isSeller ? (
                   <select
-                    value={order.status}
+                    value={order.sellerStatus || order.status}
                     onChange={(event) => handleStatusChange(order.id, event.target.value)}
                   >
                     <option value="pending">{t("status.pending")}</option>

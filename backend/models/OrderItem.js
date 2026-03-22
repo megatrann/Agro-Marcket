@@ -14,6 +14,12 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     quantity: {
       type: Number,
       required: true,
@@ -23,6 +29,19 @@ const orderItemSchema = new mongoose.Schema(
       type: Number,
       required: true,
       min: 0,
+    },
+    sellerStatus: {
+      type: String,
+      enum: ["pending", "confirmed", "completed", "cancelled"],
+      default: "pending",
+    },
+    productSnapshot: {
+      title: { type: String, default: "" },
+      category: { type: String, default: "" },
+      subcategory: { type: String, default: null },
+      organic: { type: Boolean, default: false },
+      location: { type: String, default: "" },
+      images: { type: [String], default: [] },
     },
   },
   {

@@ -57,6 +57,51 @@ const serializeProduct = (product) => {
   };
 };
 
+const getOrderItemSellerId = (item) => {
+  if (!item) {
+    return null;
+  }
+
+  if (item.sellerId) {
+    if (typeof item.sellerId === "object") {
+      return item.sellerId.id || item.sellerId._id?.toString() || String(item.sellerId);
+    }
+    return String(item.sellerId);
+  }
+
+  if (item.productId && typeof item.productId === "object" && item.productId.sellerId) {
+    const seller = item.productId.sellerId;
+    return typeof seller === "object" ? seller.id || seller._id?.toString() || null : String(seller);
+  }
+
+  return null;
+};
+
+const resolveItemStatus = (item) => item.sellerStatus || "pending";
+
+const deriveSellerStatus = (items) => {
+  const statuses = (items || []).map(resolveItemStatus);
+  if (statuses.length === 0) {
+    return "pending";
+  }
+
+  if (statuses.every((status) => status === "cancelled")) {
+    return "cancelled";
+  }
+
+  if (statuses.every((status) => status === "completed")) {
+    return "completed";
+  }
+
+  if (statuses.some((status) => status === "confirmed" || status === "completed")) {
+    return "confirmed";
+  }
+
+  return "pending";
+};
+
+const deriveOrderStatus = (items) => deriveSellerStatus(items);
+
 const serializeOrderItem = (item) => ({
   id: item.id || item._id.toString(),
   orderId: String(item.orderId),
@@ -66,24 +111,51 @@ const serializeOrderItem = (item) => ({
       : String(item.productId),
   quantity: item.quantity,
   priceAtPurchase: item.priceAtPurchase,
+  sellerId: getOrderItemSellerId(item),
+  sellerStatus: resolveItemStatus(item),
   createdAt: item.createdAt,
   updatedAt: item.updatedAt,
-  product: item.productId && typeof item.productId === "object" ? serializeProduct(item.productId) : null,
+  product:
+    item.productId && typeof item.productId === "object"
+      ? serializeProduct(item.productId)
+      : {
+          id: String(item.productId),
+          title: item.productSnapshot?.title || "Product unavailable",
+          description: "",
+          category: item.productSnapshot?.category || "",
+          subcategory: item.productSnapshot?.subcategory || null,
+          organic: Boolean(item.productSnapshot?.organic),
+          retailPrice: item.priceAtPurchase,
+          wholesalePrice: item.priceAtPurchase,
+          minWholesaleQty: 1,
+          quantity: 0,
+          location: item.productSnapshot?.location || "",
+          images: Array.isArray(item.productSnapshot?.images) ? item.productSnapshot.images : [],
+          sellerId: getOrderItemSellerId(item) || "",
+          createdAt: item.createdAt,
+          updatedAt: item.updatedAt,
+          seller: null,
+        },
 });
 
-const serializeOrder = (order) => ({
-  id: order.id || order._id.toString(),
-  userId:
-    order.userId && typeof order.userId === "object"
-      ? order.userId.id || order.userId._id.toString()
-      : String(order.userId),
-  totalAmount: order.totalAmount,
-  status: order.status,
-  createdAt: order.createdAt,
-  updatedAt: order.updatedAt,
-  buyer: order.userId && typeof order.userId === "object" ? serializeBuyer(order.userId) : null,
-  items: (order.items || []).map(serializeOrderItem),
-});
+const serializeOrder = (order, options = {}) => {
+  const serializedItems = (order.items || []).map(serializeOrderItem);
+
+  return {
+    id: order.id || order._id.toString(),
+    userId:
+      order.userId && typeof order.userId === "object"
+        ? order.userId.id || order.userId._id.toString()
+        : String(order.userId),
+    totalAmount: order.totalAmount,
+    status: order.status,
+    sellerStatus: options.includeSellerStatus ? deriveSellerStatus(serializedItems) : undefined,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    buyer: order.userId && typeof order.userId === "object" ? serializeBuyer(order.userId) : null,
+    items: serializedItems,
+  };
+};
 
 const orderPopulate = [
   { path: "userId", select: "name email role" },
@@ -135,8 +207,18 @@ const createOrderFromCart = async (req, res) => {
 
         orderItemsPayload.push({
           productId: product._id,
+          sellerId: product.sellerId,
           quantity: cartItem.quantity,
           priceAtPurchase,
+          sellerStatus: "pending",
+          productSnapshot: {
+            title: product.title,
+            category: product.category,
+            subcategory: product.subcategory,
+            organic: product.organic,
+            location: product.location,
+            images: Array.isArray(product.images) ? product.images : [],
+          },
         });
 
         product.quantity -= cartItem.quantity;
@@ -225,7 +307,7 @@ const getSellerOrders = async (req, res) => {
         : allOrders
             .map((order) => {
               const sellerItems = (order.items || []).filter(
-                (item) => item.productId && String(item.productId.sellerId?._id || item.productId.sellerId) === req.user.id
+                (item) => getOrderItemSellerId(item) === req.user.id
               );
               if (sellerItems.length === 0) {
                 return null;
@@ -237,7 +319,7 @@ const getSellerOrders = async (req, res) => {
 
     return res.status(200).json({
       count: filteredOrders.length,
-      orders: filteredOrders.map(serializeOrder),
+      orders: filteredOrders.map((order) => serializeOrder(order, { includeSellerStatus: true })),
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch seller orders" });
@@ -269,23 +351,35 @@ const updateOrderStatus = async (req, res) => {
     }
 
     if (req.user.role !== "admin") {
-      const sellerOwnsAnyItem = (order.items || []).some(
-        (item) => item.productId && String(item.productId.sellerId?._id || item.productId.sellerId) === req.user.id
-      );
-
-      if (!sellerOwnsAnyItem) {
+      const sellerItems = (order.items || []).filter((item) => getOrderItemSellerId(item) === req.user.id);
+      if (sellerItems.length === 0) {
         return res.status(403).json({ message: "Not authorized to update this order" });
       }
+
+      await Promise.all(
+        sellerItems.map((item) => {
+          item.sellerStatus = status;
+          return item.save();
+        })
+      );
+    } else {
+      await Promise.all(
+        (order.items || []).map((item) => {
+          item.sellerStatus = status;
+          return item.save();
+        })
+      );
     }
 
-    order.status = status;
+    const orderItems = await OrderItem.find({ orderId: order._id });
+    order.status = deriveOrderStatus(orderItems);
     await order.save();
 
     const updatedOrder = await Order.findById(orderId).populate(orderPopulate);
 
     return res.status(200).json({
       message: "Order status updated successfully",
-      order: serializeOrder(updatedOrder),
+      order: serializeOrder(updatedOrder, { includeSellerStatus: req.user.role !== "admin" }),
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to update order status" });

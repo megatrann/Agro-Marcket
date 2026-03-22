@@ -11,6 +11,11 @@ const productService = {
     return response.data;
   },
 
+  getMyProducts: async () => {
+    const response = await api.get("/products/mine");
+    return response.data;
+  },
+
   createProduct: async (payload) => {
     const imageFiles = Array.isArray(payload.imageFiles) ? payload.imageFiles : [];
 

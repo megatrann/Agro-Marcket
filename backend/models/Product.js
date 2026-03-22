@@ -19,6 +19,11 @@ const productSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    isArchived: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,

@@ -16,8 +16,10 @@ function Footer() {
           <nav className="footer-links" aria-label="Footer links">
             <Link to="/products">{t("footer.marketplace")}</Link>
             <Link to="/products/new">{t("footer.sell")}</Link>
+            <Link to="/my-products">My Products</Link>
             <Link to="/orders">{t("footer.orders")}</Link>
             <Link to="/cart">{t("footer.cart")}</Link>
+            <Link to="/profile">Profile</Link>
           </nav>
         </div>
         <p className="footer-bottom">© {year} Agri Market. {t("footer.bottom")}</p>

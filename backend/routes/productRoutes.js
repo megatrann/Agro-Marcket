@@ -2,6 +2,7 @@ const express = require("express");
 const {
   createProduct,
   listProducts,
+  listMyProducts,
   getProductById,
   updateProduct,
   deleteProduct,
@@ -12,6 +13,7 @@ const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
 router.get("/", listProducts);
+router.get("/mine", authMiddleware, listMyProducts);
 router.get("/:id", getProductById);
 router.post("/", authMiddleware, upload.array("images", 8), createProduct);
 router.put("/:id", authMiddleware, upload.array("images", 8), updateProduct);
