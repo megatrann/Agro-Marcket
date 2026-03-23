@@ -114,20 +114,32 @@ const sanitizeProduct = (product) => {
   };
 };
 
-const validateProductInput = (payload, isPartial = false) => {
+const validateProductInput = (payload, isPartial = false, userRole = "farmer") => {
   const errors = [];
 
-  const requiredFields = [
-    "title",
-    "description",
-    "category",
-    "retailPrice",
-    "wholesalePrice",
-    "minWholesaleQty",
-    "quantity",
-    "location",
-    "organic",
-  ];
+  // Define required fields based on user role
+  let requiredFields;
+  if (userRole === "vendor") {
+    requiredFields = [
+      "title",
+      "description",
+      "category",
+      "quantity",
+      "location",
+    ];
+  } else {
+    requiredFields = [
+      "title",
+      "description",
+      "category",
+      "retailPrice",
+      "wholesalePrice",
+      "minWholesaleQty",
+      "quantity",
+      "location",
+      "organic",
+    ];
+  }
 
   if (!isPartial) {
     requiredFields.forEach((field) => {
@@ -141,24 +153,31 @@ const validateProductInput = (payload, isPartial = false) => {
     errors.push(`category must be one of: ${CATEGORIES.join(", ")}`);
   }
 
-  if (payload.retailPrice !== undefined && payload.retailPrice !== null && payload.retailPrice < 0) {
-    errors.push("retailPrice must be >= 0");
-  }
+  // Only validate price fields for non-vendor (farmer) products
+  if (userRole !== "vendor") {
+    if (payload.retailPrice !== undefined && payload.retailPrice !== null && payload.retailPrice < 0) {
+      errors.push("retailPrice must be >= 0");
+    }
 
-  if (
-    payload.wholesalePrice !== undefined &&
-    payload.wholesalePrice !== null &&
-    payload.wholesalePrice < 0
-  ) {
-    errors.push("wholesalePrice must be >= 0");
-  }
+    if (
+      payload.wholesalePrice !== undefined &&
+      payload.wholesalePrice !== null &&
+      payload.wholesalePrice < 0
+    ) {
+      errors.push("wholesalePrice must be >= 0");
+    }
 
-  if (
-    payload.minWholesaleQty !== undefined &&
-    payload.minWholesaleQty !== null &&
-    (!Number.isInteger(payload.minWholesaleQty) || payload.minWholesaleQty < 1)
-  ) {
-    errors.push("minWholesaleQty must be an integer >= 1");
+    if (
+      payload.minWholesaleQty !== undefined &&
+      payload.minWholesaleQty !== null &&
+      (!Number.isInteger(payload.minWholesaleQty) || payload.minWholesaleQty < 1)
+    ) {
+      errors.push("minWholesaleQty must be an integer >= 1");
+    }
+
+    if (payload.organic !== undefined && typeof payload.organic !== "boolean") {
+      errors.push("organic must be true or false");
+    }
   }
 
   if (
@@ -167,10 +186,6 @@ const validateProductInput = (payload, isPartial = false) => {
     (!Number.isInteger(payload.quantity) || payload.quantity < 0)
   ) {
     errors.push("quantity must be an integer >= 0");
-  }
-
-  if (payload.organic !== undefined && typeof payload.organic !== "boolean") {
-    errors.push("organic must be true or false");
   }
 
   return errors;
@@ -206,7 +221,7 @@ const createProduct = async (req, res) => {
       payload.quantity = Math.trunc(payload.quantity);
     }
 
-    const validationErrors = validateProductInput(payload);
+    const validationErrors = validateProductInput(payload, false, req.user.role);
     if (validationErrors.length > 0) {
       return res.status(400).json({
         message: "Validation failed",
