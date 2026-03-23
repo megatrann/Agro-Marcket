@@ -18,27 +18,6 @@ function AddProductPage() {
     return <Navigate to="/" replace />;
   }
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageSelection = (event) => {
-    const selectedFiles = Array.from(event.target.files || []);
-    if (selectedFiles.length > 8) {
-      setError(t("add.tooManyImages"));
-      setImageFiles(selectedFiles.slice(0, 8));
-      return;
-    }
-
-    setError("");
-    setImageFiles(selectedFiles);
-  };
-
-  const previews = useMemo(
-    () => imageFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) })),
-    [imageFiles]
-  );
   return (
     <section className="page-card add-product-wrap">
       <div className="section-head">
