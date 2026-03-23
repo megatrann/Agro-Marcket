@@ -49,12 +49,13 @@ export default function AddVendorProductForm() {
         const uploadResults = await Promise.all(imageFiles.map(uploadToCloudinary));
         imageUrls = uploadResults.map((res) => res.secure_url);
       }
-      await productService.createProduct({
+      const payload = {
         ...form,
-        price: Number(form.price),
-        quantity: Number(form.quantity),
+        quantity: form.quantity ? Number(form.quantity) : 0,
         images: imageUrls,
-      });
+      };
+      if (form.price) payload.price = Number(form.price);
+      await productService.createProduct(payload);
       setSuccess(t("add.createSuccess"));
       setTimeout(() => navigate("/products"), 800);
     } catch (err) {

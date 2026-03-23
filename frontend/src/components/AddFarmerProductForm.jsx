@@ -49,15 +49,16 @@ export default function AddFarmerProductForm() {
         const uploadResults = await Promise.all(imageFiles.map(uploadToCloudinary));
         imageUrls = uploadResults.map((res) => res.secure_url);
       }
-      await productService.createProduct({
+      const payload = {
         ...form,
         organic: form.type === "organic",
-        retailPrice: Number(form.retailPrice),
-        wholesalePrice: Number(form.wholesalePrice),
-        minWholesaleQty: Number(form.minWholesaleQty),
-        quantity: Number(form.quantity),
         images: imageUrls,
-      });
+      };
+      if (form.retailPrice) payload.retailPrice = Number(form.retailPrice);
+      if (form.wholesalePrice) payload.wholesalePrice = Number(form.wholesalePrice);
+      if (form.minWholesaleQty) payload.minWholesaleQty = Number(form.minWholesaleQty);
+      if (form.quantity) payload.quantity = Number(form.quantity);
+      await productService.createProduct(payload);
       setSuccess(t("add.createSuccess"));
       setTimeout(() => navigate("/products"), 800);
     } catch (err) {
