@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import productService from "../services/productService";
@@ -66,7 +67,13 @@ export default function AddVendorProductForm() {
   return (
     <form className="add-product-form" onSubmit={handleSubmit}>
       <label>Product Name<input name="title" value={form.title} onChange={handleChange} required /></label>
-      <label>Category<select name="category" value={form.category} onChange={handleChange}>{VENDOR_CATEGORIES.map((cat) => <option key={cat} value={cat}>{cat}</option>)}</select></label>
+      <label>Category
+        <select name="category" value={form.category} onChange={handleChange}>
+          {VENDOR_CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </label>
       <label>Subcategory<input name="subcategory" value={form.subcategory} onChange={handleChange} /></label>
       <label>Brand<input name="brand" value={form.brand} onChange={handleChange} /></label>
       <label>Model<input name="model" value={form.model} onChange={handleChange} /></label>
