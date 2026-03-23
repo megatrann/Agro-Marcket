@@ -22,35 +22,7 @@ const productService = {
   },
 
   createProduct: async (payload) => {
-    const imageFiles = Array.isArray(payload.imageFiles) ? payload.imageFiles : [];
-
-    if (imageFiles.length > 0) {
-      const formData = new FormData();
-      formData.append("title", payload.title);
-      formData.append("description", payload.description);
-      formData.append("category", payload.category);
-      if (payload.subcategory) {
-        formData.append("subcategory", payload.subcategory);
-      }
-      formData.append("organic", String(payload.organic));
-      formData.append("retailPrice", String(payload.retailPrice));
-      formData.append("wholesalePrice", String(payload.wholesalePrice));
-      formData.append("minWholesaleQty", String(payload.minWholesaleQty));
-      formData.append("quantity", String(payload.quantity));
-      formData.append("location", payload.location);
-
-      imageFiles.forEach((file) => {
-        formData.append("images", file);
-      });
-
-      const response = await api.post("/products", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      return response.data;
-    }
-
+    // Now expects payload.images to be an array of Cloudinary URLs
     const response = await api.post("/products", payload);
     return response.data;
   },

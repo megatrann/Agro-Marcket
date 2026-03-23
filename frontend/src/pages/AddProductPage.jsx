@@ -6,6 +6,7 @@ import aiService from "../services/aiService";
 import { CATEGORY_OPTIONS } from "../utils/constants";
 import { getApiErrorMessage } from "../utils/apiError";
 import { FALLBACK_IMAGE } from "../utils/image";
+import { uploadToCloudinary } from "../utils/cloudinary";
 import { useLanguage } from "../context/LanguageContext";
 
 function AddProductPage() {
@@ -109,6 +110,15 @@ function AddProductPage() {
     setSubmitting(true);
 
     try {
+      let imageUrls = [];
+      if (imageFiles.length > 0) {
+        // Upload all images to Cloudinary in parallel
+        const uploadResults = await Promise.all(
+          imageFiles.map((file) => uploadToCloudinary(file))
+        );
+        imageUrls = uploadResults.map((res) => res.secure_url);
+      }
+
       await productService.createProduct({
         title: form.title,
         description: form.description,
@@ -120,7 +130,7 @@ function AddProductPage() {
         minWholesaleQty: Number(form.minWholesaleQty),
         quantity: Number(form.quantity),
         location: form.location,
-        imageFiles,
+        images: imageUrls,
       });
 
       setSuccess(t("add.createSuccess"));
